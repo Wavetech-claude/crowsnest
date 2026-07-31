@@ -1,0 +1,9 @@
+.DS_Store
+build/
+*.png
+__pycache__/
+*.pyc
+!docs/images/*.png
+
+# local-only launch/marketing drafts, never published
+launch/
