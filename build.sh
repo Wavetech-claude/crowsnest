@@ -1,14 +1,14 @@
 #!/bin/bash
-# Build ClaudeFleet.app -- a signed, self-contained menu bar app.
+# Build CrowsNest.app -- a signed, self-contained menu bar app.
 # No .xcodeproj: swiftc compiles the sources, then we assemble the bundle.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Ad-hoc signing by default ("-"), so the build works out of the box on any Mac
 # and ships no one's identity in source. For a real signing identity, export
-# your own: CLAUDE_FLEET_IDENTITY="Apple Development: you@example.com (TEAMID)".
-IDENTITY="${CLAUDE_FLEET_IDENTITY:--}"
-DEST="${CLAUDE_FLEET_DEST:-$HOME/Applications}"
+# your own: CROWSNEST_IDENTITY="Apple Development: you@example.com (TEAMID)".
+IDENTITY="${CROWSNEST_IDENTITY:--}"
+DEST="${CROWSNEST_DEST:-$HOME/Applications}"
 
 # Assemble in a scratch dir, never in the source tree. This repo lives under
 # Desktop, which iCloud syncs, and the file provider re-attaches
@@ -17,13 +17,13 @@ DEST="${CLAUDE_FLEET_DEST:-$HOME/Applications}"
 # detritus". Building outside the synced tree removes the race entirely.
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
-APP="$STAGE/ClaudeFleet.app"
+APP="$STAGE/CrowsNest.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
 echo "==> compiling"
 swiftc -O -parse-as-library \
     -target arm64-apple-macos14.0 \
-    -o "$APP/Contents/MacOS/ClaudeFleet" \
+    -o "$APP/Contents/MacOS/CrowsNest" \
     "$HERE"/Sources/*.swift
 
 # collector.py ships inside the bundle so the app is self-contained; it is
@@ -38,10 +38,10 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-  <key>CFBundleExecutable</key><string>ClaudeFleet</string>
-  <key>CFBundleIdentifier</key><string>com.sleek.claude-fleet</string>
-  <key>CFBundleName</key><string>Claude Fleet</string>
-  <key>CFBundleDisplayName</key><string>Claude Fleet</string>
+  <key>CFBundleExecutable</key><string>CrowsNest</string>
+  <key>CFBundleIdentifier</key><string>com.atwavetech.crowsnest</string>
+  <key>CFBundleName</key><string>Crow's Nest</string>
+  <key>CFBundleDisplayName</key><string>Crow's Nest</string>
   <key>NSUserNotificationAlertStyle</key><string>alert</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
@@ -60,7 +60,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
     inherits the terminal's grant and works, which makes this easy to
     misdiagnose as a code bug.
   -->
-  <key>NSLocalNetworkUsageDescription</key><string>Claude Fleet connects to your development machine over SSH to read which Claude Code sessions are running.</string>
+  <key>NSLocalNetworkUsageDescription</key><string>Crow's Nest connects to your development machine over SSH to read which Claude Code sessions are running.</string>
 </dict></plist>
 PLIST
 
@@ -71,11 +71,11 @@ codesign --verify --strict "$APP" && echo "    signature OK"
 
 echo "==> installing"
 mkdir -p "$DEST"
-rm -rf "$DEST/ClaudeFleet.app"
+rm -rf "$DEST/CrowsNest.app"
 # ditto preserves the signature; cp -R does not reliably.
-ditto "$APP" "$DEST/ClaudeFleet.app"
-codesign --verify --strict "$DEST/ClaudeFleet.app" && echo "    installed signature OK"
+ditto "$APP" "$DEST/CrowsNest.app"
+codesign --verify --strict "$DEST/CrowsNest.app" && echo "    installed signature OK"
 
 echo
-echo "Installed $DEST/ClaudeFleet.app"
-echo "Run it:   open '$DEST/ClaudeFleet.app'"
+echo "Installed $DEST/CrowsNest.app"
+echo "Run it:   open '$DEST/CrowsNest.app'"

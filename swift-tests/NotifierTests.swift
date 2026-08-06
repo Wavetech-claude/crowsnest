@@ -12,7 +12,7 @@ import Foundation
 /// No XCTest, no SwiftPM package -- there isn't one in this repo, and this
 /// test target isn't reason enough to add it. `run.sh` compiles this file
 /// together with just `Session.swift` and `Notifier.swift` (not the whole
-/// `Sources/` directory -- that also carries `ClaudeFleetApp.swift`'s
+/// `Sources/` directory -- that also carries `CrowsNestApp.swift`'s
 /// `@main`, which would collide with this file's) and runs the result. A
 /// plain executable that exits non-zero on any failed check is the whole
 /// contract.

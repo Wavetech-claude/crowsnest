@@ -221,7 +221,7 @@ struct HiddenSession: Decodable, Sendable, Equatable, Identifiable {
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        // `reason` is remote-controlled and lands in ~/.claude-fleet/last-poll.log
+        // `reason` is remote-controlled and lands in ~/.crowsnest/last-poll.log
         // and Settings -> Diagnostics; clean it like every other remote string.
         sessionId = Session.clean(try c.decode(String.self, forKey: .sessionId)) ?? ""
         reason = Session.clean(try c.decode(String.self, forKey: .reason)) ?? ""
@@ -277,7 +277,7 @@ struct CollectorPayload: Decodable, Sendable {
         //
         // `error` is cleaned like every other remote string: a compromised
         // remote controls these bytes, and they are written to
-        // ~/.claude-fleet/last-poll.log -- which the docs tell users to `cat`
+        // ~/.crowsnest/last-poll.log -- which the docs tell users to `cat`
         // when debugging. Stripping control characters keeps a crafted value
         // from planting terminal escape sequences that fire on `cat`.
         ok = try? container.decode(Bool.self, forKey: .ok)

@@ -13,7 +13,7 @@ import Network
 ///
 /// This does no SSH and reads no session data -- it only asks the question
 /// macOS needs asked, once per launch. Outcomes are diagnosable via
-/// `~/.claude-fleet/local-network.log`; the main session list never shows
+/// `~/.crowsnest/local-network.log`; the main session list never shows
 /// connection state, per the project's standing UI rule.
 @MainActor
 final class LocalNetworkPermission {
@@ -25,7 +25,7 @@ final class LocalNetworkPermission {
 
     private var connection: NWConnection?
     private var lastState: NWConnection.State?
-    private let queue = DispatchQueue(label: "claude-fleet.local-network-permission")
+    private let queue = DispatchQueue(label: "crowsnest.local-network-permission")
 
     /// Opens a TCP connection to `host:port` and holds it open for several
     /// seconds -- long enough for macOS to offer the Local Network prompt --
@@ -114,7 +114,7 @@ final class LocalNetworkPermission {
         }
 
         let dir = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".claude-fleet", isDirectory: true)
+            .appendingPathComponent(".crowsnest", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let line = """
         primed: \(ISO8601DateFormatter().string(from: Date()))

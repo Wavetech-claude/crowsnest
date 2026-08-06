@@ -55,7 +55,7 @@ the same host silently succeeds by reusing it and proves nothing. Before testing
 connection, always:
 
 ```bash
-ssh -O exit <host> 2>/dev/null; rm -f ~/.claude-fleet/cm/*
+ssh -O exit <host> 2>/dev/null; rm -f ~/.crowsnest/cm/*
 ```
 
 This is written up in [docs/traps.md](docs/traps.md) — it cost real hours.

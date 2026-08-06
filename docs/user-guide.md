@@ -75,19 +75,19 @@ list empty and calm. The diagnosis lives in two places:
 
 - **Settings → Diagnostics** — the last poll's session count, anything hidden and why, and
   any transport error.
-- `~/.claude-fleet/last-poll.log` — the same, on disk.
+- `~/.crowsnest/last-poll.log` — the same, on disk.
 
 See [troubleshooting](troubleshooting.md) for the common cases.
 
 ## Start at login
 
-System Settings → General → Login Items → **+** → `~/Applications/ClaudeFleet.app`.
+System Settings → General → Login Items → **+** → `~/Applications/CrowsNest.app`.
 
 ## Uninstall
 
-Quit from the panel, drag `~/Applications/ClaudeFleet.app` to the Trash, and optionally
+Quit from the panel, drag `~/Applications/CrowsNest.app` to the Trash, and optionally
 remove its state:
 
 ```bash
-rm -rf ~/.claude-fleet ~/Library/Preferences/com.sleek.claude-fleet.plist
+rm -rf ~/.crowsnest ~/Library/Preferences/com.atwavetech.crowsnest.plist
 ```

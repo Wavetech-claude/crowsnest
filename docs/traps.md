@@ -12,7 +12,7 @@ real Python is `py`.
 
 So the collector can't assume `python3`. The app probes `python3`, then `py`, then
 `python`, per host, and caches the winner. The empty-stdout-on-failure behaviour is what
-makes the probe clean: a run only "counts" if its output contains the `<<<CLAUDE_FLEET>>>`
+makes the probe clean: a run only "counts" if its output contains the `<<<CROWSNEST>>>`
 marker, so a stub that produced nothing falls through to the next candidate. Had the stub
 written its message to stdout, the probe would have mistaken it for real output.
 
@@ -82,7 +82,7 @@ networking and sent the whole investigation chasing ghosts.
 control path first:
 
 ```bash
-ssh -O exit <host> 2>/dev/null; rm -f ~/.claude-fleet/cm/*
+ssh -O exit <host> 2>/dev/null; rm -f ~/.crowsnest/cm/*
 ```
 
 ## 6. iCloud re-attaches extended attributes mid-build

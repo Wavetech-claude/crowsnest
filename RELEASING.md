@@ -34,9 +34,9 @@ Releases are cut on the GitHub side.
    ```
 4. Tag and release on GitHub:
    ```bash
-   git tag -a vX.Y.Z github-clean -m "Claude Fleet X.Y.Z"
+   git tag -a vX.Y.Z github-clean -m "Crow's Nest X.Y.Z"
    git push github vX.Y.Z
-   gh release create vX.Y.Z --repo <owner>/claude-fleet --title "Claude Fleet X.Y.Z" \
+   gh release create vX.Y.Z --repo <owner>/crowsnest --title "Crow's Nest X.Y.Z" \
        --notes-file <(sed -n '/## \[X.Y.Z\]/,/## \[/p' CHANGELOG.md)
    ```
 
@@ -64,8 +64,8 @@ notarization requirement to be pleasant.
 **Recommendation:** stay build-from-source until there's real demand. If the project gains
 traction, the upgrade path is, in order:
 1. Join the Apple Developer Program, sign with Developer ID, and notarize in `build.sh`.
-2. Attach a notarized `ClaudeFleet.app.zip` to each GitHub Release (via `gh release upload`).
-3. Publish a Homebrew tap (`brew tap <owner>/claude-fleet`) with a cask pointing at that
+2. Attach a notarized `CrowsNest.app.zip` to each GitHub Release (via `gh release upload`).
+3. Publish a Homebrew tap (`brew tap <owner>/crowsnest`) with a cask pointing at that
    release asset.
 
 None of that is worth doing for a handful of users, and all of it is a standing

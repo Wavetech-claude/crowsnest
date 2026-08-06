@@ -6,7 +6,7 @@ menu bar. The seam is a framed JSON blob, so either side can be understood and t
 without the other.
 
 ```
-ClaudeFleet.app (Swift / SwiftUI, menu bar only)
+CrowsNest.app (Swift / SwiftUI, menu bar only)
   └─ AppDelegate                 starts polling at launch
        ├─ LocalNetworkPermission primes the macOS LAN grant once
        └─ SessionStore           poll loop (timer), publishes [RepoGroup]
@@ -30,7 +30,7 @@ Claude Code writes locally:
 and prints one document, bracketed so a login banner can't corrupt the parse:
 
 ```
-<<<CLAUDE_FLEET>>>{"sessions": [...], "hidden": [...], "collected": N, "ok": true}<<<END>>>
+<<<CROWSNEST>>>{"sessions": [...], "hidden": [...], "collected": N, "ok": true}<<<END>>>
 ```
 
 **Transcripts are never read whole.** They run to tens of megabytes; the collector
@@ -74,7 +74,7 @@ as `live` — failing toward showing, never toward hiding.
 
 | File | Responsibility |
 |---|---|
-| `ClaudeFleetApp.swift` | The `MenuBarExtra` scene + `AppDelegate`; starts polling at launch |
+| `CrowsNestApp.swift` | The `MenuBarExtra` scene + `AppDelegate`; starts polling at launch |
 | `SessionStore.swift` | The poll loop, the two SSH/local transports, JSON decode, diagnostics |
 | `Session.swift` | The decoded model, input sanitisation, and `Shell.quote` |
 | `MenuPanel.swift` | The panel: repo sections, rows, settings, right-click actions |
@@ -119,9 +119,9 @@ a machine boundary into your Mac. Two consequences shape the code:
 
 ## Where state lives
 
-- `~/.claude-fleet/cm/` — the shared SSH control socket
-- `~/.claude-fleet/last-poll.log` — the last poll's diagnostics (why it failed, if it did)
-- `~/.claude-fleet/local-network.log` — the LAN-permission probe's outcome
-- `~/Library/Preferences/com.sleek.claude-fleet.plist` — Settings + per-host interpreter cache
+- `~/.crowsnest/cm/` — the shared SSH control socket
+- `~/.crowsnest/last-poll.log` — the last poll's diagnostics (why it failed, if it did)
+- `~/.crowsnest/local-network.log` — the LAN-permission probe's outcome
+- `~/Library/Preferences/com.atwavetech.crowsnest.plist` — Settings + per-host interpreter cache
 
 No daemon, no server, no root. One process, running as you, only while you're logged in.

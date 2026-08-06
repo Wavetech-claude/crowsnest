@@ -32,7 +32,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 #if !PREVIEW
 @main
 #endif
-struct ClaudeFleetApp: App {
+struct CrowsNestApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     /// Owned by the scene so SwiftUI observes it; the same instance the
     /// delegate starts. @StateObject's autoclosure runs once, so this does

@@ -3,7 +3,7 @@
 The session list never shows errors on purpose, so start every diagnosis here:
 
 ```bash
-cat ~/.claude-fleet/last-poll.log
+cat ~/.crowsnest/last-poll.log
 ```
 
 and **Settings → Diagnostics** in the app. That one line is usually the whole answer.
@@ -21,7 +21,7 @@ Work through these in order — the first is by far the most common.
 The app needs a **Local Network** grant to reach the LAN, and the prompt is easy to miss
 or may not appear at all (see [traps §4](traps.md#4-the-macos-local-network-permission-deadlock)).
 
-- Check **System Settings → Privacy & Security → Local Network** for "Claude Fleet" and
+- Check **System Settings → Privacy & Security → Local Network** for "Crow's Nest" and
   turn it **on**.
 - If it isn't listed, quit and relaunch the app so it re-attempts a connection (that's what
   registers it). Then check again.
@@ -73,14 +73,14 @@ You're on an old build. This was a bug where the panel's scroll view collapsed t
 height inside the menu bar window. Rebuild:
 
 ```bash
-./build.sh && open ~/Applications/ClaudeFleet.app
+./build.sh && open ~/Applications/CrowsNest.app
 ```
 
 ---
 
 ## Notifications don't arrive
 
-- Confirm you allowed them: **System Settings → Notifications → Claude Fleet**.
+- Confirm you allowed them: **System Settings → Notifications → Crow's Nest**.
 - The app only notifies on the *transition into* a state, and never for sessions already in
   that state when it launched. To test, take a running session from working into a
   permission prompt and wait one refresh interval.

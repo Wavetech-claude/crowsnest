@@ -1,4 +1,4 @@
-# Claude Fleet Hardening Implementation Plan
+# Crow's Nest Hardening Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -12,7 +12,7 @@
 
 - `collector.py` must remain **stdlib-only** and **Python 3.6-compatible** — it is piped to winbox over stdin and nothing may be installed there.
 - `collector.py` must run under `py` on Windows and `python3` on macOS. Never assume `python3` exists on winbox: it is a Microsoft Store stub that exits **49** with empty stdout.
-- Output must stay bracketed by `<<<CLAUDE_FLEET>>>` … `<<<END>>>`.
+- Output must stay bracketed by `<<<CROWSNEST>>>` … `<<<END>>>`.
 - Handle **both** path styles: Windows (`E:\foo\bar`, `C:\Users\you`) and POSIX.
 - The main session list must never display a hostname, connection status, error text, or retry count. Diagnostics live only in Settings.
 - When a machine is unreachable the list must be **empty and calm** — no warning, no error row.
@@ -203,7 +203,7 @@ if __name__ == "__main__":
 
 - [ ] **Step 3: Run the tests to verify they fail**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && python3 -m unittest discover -s tests -t tests -v`
+Run: `cd ~/Desktop/Projects/crowsnest && python3 -m unittest discover -s tests -t tests -v`
 
 Expected: FAIL. `collect()` currently returns a bare list, so unpacking raises
 `ValueError: too many values to unpack`, and `live_pids()` returns a dict rather than a tuple.
@@ -394,15 +394,15 @@ And add `"hidden": []` and `"collected": 0` to the `doc` literal alongside `"ses
 
 - [ ] **Step 9: Run the tests to verify they pass**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && python3 -m unittest discover -s tests -t tests -v`
+Run: `cd ~/Desktop/Projects/crowsnest && python3 -m unittest discover -s tests -t tests -v`
 
 Expected: PASS, 4 tests.
 
 - [ ] **Step 10: Verify against the live machine**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && ssh winbox "py -" < collector.py | head -c 400`
+Run: `cd ~/Desktop/Projects/crowsnest && ssh winbox "py -" < collector.py | head -c 400`
 
-Expected: framed JSON beginning `<<<CLAUDE_FLEET>>>{"host": "winbox"...` containing real
+Expected: framed JSON beginning `<<<CROWSNEST>>>{"host": "winbox"...` containing real
 sessions with `"liveness": "live"` and `"hidden": []`.
 
 - [ ] **Step 11: Commit**
@@ -468,7 +468,7 @@ class PathTest(unittest.TestCase):
 
 - [ ] **Step 2: Run to verify they fail**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && python3 -m unittest discover -s tests -t tests -v`
+Run: `cd ~/Desktop/Projects/crowsnest && python3 -m unittest discover -s tests -t tests -v`
 
 Expected: FAIL with `AttributeError: module 'collector' has no attribute '_norm'`.
 
@@ -526,7 +526,7 @@ In `collector.py`, replace the whole `for sess in sessions:` block that assigns
 
 - [ ] **Step 5: Run to verify they pass**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && python3 -m unittest discover -s tests -t tests -v`
+Run: `cd ~/Desktop/Projects/crowsnest && python3 -m unittest discover -s tests -t tests -v`
 
 Expected: PASS, 7 tests.
 
@@ -594,7 +594,7 @@ class IdleDecayTest(unittest.TestCase):
 
 - [ ] **Step 2: Run to verify the first test fails**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && python3 -m unittest discover -s tests -t tests -v`
+Run: `cd ~/Desktop/Projects/crowsnest && python3 -m unittest discover -s tests -t tests -v`
 
 Expected: `test_old_waiting_session_decays_to_idle` FAILS with `'waiting' != 'idle'`.
 The other two pass already.
@@ -618,7 +618,7 @@ with:
 
 - [ ] **Step 4: Run to verify they pass**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && python3 -m unittest discover -s tests -t tests -v`
+Run: `cd ~/Desktop/Projects/crowsnest && python3 -m unittest discover -s tests -t tests -v`
 
 Expected: PASS, 10 tests.
 
@@ -639,7 +639,7 @@ finished days ago."
 With the panel closed the app spawns no collector at all, so the badge never updates.
 
 **Files:**
-- Modify: `Sources/ClaudeFleetApp.swift`
+- Modify: `Sources/CrowsNestApp.swift`
 - Modify: `Sources/SessionStore.swift:36-71` (`init`, `restartTimer`, `refreshSoon`)
 
 **Interfaces:**
@@ -648,7 +648,7 @@ With the panel closed the app spawns no collector at all, so the badge never upd
 
 - [ ] **Step 1: Replace the App entry point**
 
-Replace the whole of `Sources/ClaudeFleetApp.swift` above `private struct MenuBarLabel` with:
+Replace the whole of `Sources/CrowsNestApp.swift` above `private struct MenuBarLabel` with:
 
 ```swift
 import SwiftUI
@@ -670,7 +670,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 #if !PREVIEW
 @main
 #endif
-struct ClaudeFleetApp: App {
+struct CrowsNestApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
@@ -758,19 +758,19 @@ In `Sources/SessionStore.swift`, replace `init()`, `restartTimer()` and `refresh
 
 - [ ] **Step 3: Build and install**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && ./build.sh`
+Run: `cd ~/Desktop/Projects/crowsnest && ./build.sh`
 
-Expected: `signature OK`, `installed signature OK`, `Installed /Users/you/Applications/ClaudeFleet.app`.
+Expected: `signature OK`, `installed signature OK`, `Installed /Users/you/Applications/CrowsNest.app`.
 
 - [ ] **Step 4: Verify polling happens with the panel never opened**
 
 This is the behavioural test that defines the task. Launch the app and **do not click it**:
 
 ```bash
-pkill -f "ClaudeFleet.app/Contents/MacOS"; sleep 1
-open ~/Applications/ClaudeFleet.app
+pkill -f "CrowsNest.app/Contents/MacOS"; sleep 1
+open ~/Applications/CrowsNest.app
 for i in $(seq 1 8); do
-  echo "t=$((i*5))s ssh=$(pgrep -f 'ssh .*winbox' | wc -l | tr -d ' ') sockets=$(ls ~/.claude-fleet/cm/ 2>/dev/null | wc -l | tr -d ' ')"
+  echo "t=$((i*5))s ssh=$(pgrep -f 'ssh .*winbox' | wc -l | tr -d ' ') sockets=$(ls ~/.crowsnest/cm/ 2>/dev/null | wc -l | tr -d ' ')"
   sleep 5
 done
 ```
@@ -782,7 +782,7 @@ collector ran without the panel being opened. Before this task the same command 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add Sources/ClaudeFleetApp.swift Sources/SessionStore.swift
+git add Sources/CrowsNestApp.swift Sources/SessionStore.swift
 git commit -m "fix: poll in the background instead of only when the panel opens
 
 SwiftUI does not construct a MenuBarExtra's @StateObject until it
@@ -843,7 +843,7 @@ Replace `decode(_:)` with a version that returns the whole payload:
 ```swift
     private static func decode(_ data: Data) -> CollectorPayload? {
         guard let text = String(data: data, encoding: .utf8),
-              let start = text.range(of: "<<<CLAUDE_FLEET>>>"),
+              let start = text.range(of: "<<<CROWSNEST>>>"),
               let end = text.range(of: "<<<END>>>", range: start.upperBound..<text.endIndex)
         else { return nil }
 
@@ -963,7 +963,7 @@ In `Sources/MenuPanel.swift`, replace the `if let error = store.lastError { … 
 Run:
 
 ```bash
-cd ~/Desktop/Projects/claude-fleet && \
+cd ~/Desktop/Projects/crowsnest && \
 swiftc -O -parse-as-library -DPREVIEW -target arm64-apple-macos14.0 \
     -o /tmp/cfpreview Sources/*.swift && /tmp/cfpreview fixture.json /tmp/panel.png dark
 ```
@@ -1086,7 +1086,7 @@ In `build.sh`, inside the `Info.plist` heredoc, add below the `CFBundleDisplayNa
 
 - [ ] **Step 4: Build, install and verify a real notification**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && ./build.sh && open ~/Applications/ClaudeFleet.app`
+Run: `cd ~/Desktop/Projects/crowsnest && ./build.sh && open ~/Applications/CrowsNest.app`
 
 Expected: macOS prompts once for notification permission. Grant it. Then confirm no burst
 appears at launch even with sessions already waiting — that is the seeding rule working.
@@ -1123,17 +1123,17 @@ sessions already blocked does not produce a burst."
 The two states that matter most should be renderable offline rather than waited for:
 
 ```bash
-cd ~/Desktop/Projects/claude-fleet && mkdir -p fixtures && \
+cd ~/Desktop/Projects/crowsnest && mkdir -p fixtures && \
 ssh winbox "py -" < collector.py > fixtures/blocked.json && \
 python3 - <<'PY'
 import json, re
 raw = open("fixtures/blocked.json").read()
-doc = json.loads(re.search(r"<<<CLAUDE_FLEET>>>(.*)<<<END>>>", raw, re.S).group(1))
+doc = json.loads(re.search(r"<<<CROWSNEST>>>(.*)<<<END>>>", raw, re.S).group(1))
 for i, s in enumerate(doc["sessions"]):
     if i == 0:
         s["state"], s["state_reason"] = "blocked", "tool call issued 12m ago with no progress -- likely a permission prompt"
     s.setdefault("rel_path", "agents" if i == 1 else "")
-open("fixtures/blocked.json", "w").write("<<<CLAUDE_FLEET>>>" + json.dumps(doc) + "<<<END>>>")
+open("fixtures/blocked.json", "w").write("<<<CROWSNEST>>>" + json.dumps(doc) + "<<<END>>>")
 print("sessions:", len(doc["sessions"]))
 PY
 ```
@@ -1145,7 +1145,7 @@ Expected: `sessions: 3` or however many are live.
 Run:
 
 ```bash
-cd ~/Desktop/Projects/claude-fleet && \
+cd ~/Desktop/Projects/crowsnest && \
 swiftc -O -parse-as-library -DPREVIEW -target arm64-apple-macos14.0 \
     -o /tmp/cfpreview Sources/*.swift && \
 /tmp/cfpreview fixtures/blocked.json /tmp/blocked.png dark
@@ -1157,19 +1157,19 @@ approval".
 
 - [ ] **Step 3: Run the whole test suite**
 
-Run: `cd ~/Desktop/Projects/claude-fleet && python3 -m unittest discover -s tests -t tests -v`
+Run: `cd ~/Desktop/Projects/crowsnest && python3 -m unittest discover -s tests -t tests -v`
 
 Expected: PASS, 10 tests.
 
 - [ ] **Step 4: Confirm the acceptance criteria against the running app**
 
-Install and run: `cd ~/Desktop/Projects/claude-fleet && ./build.sh && open ~/Applications/ClaudeFleet.app`
+Install and run: `cd ~/Desktop/Projects/crowsnest && ./build.sh && open ~/Applications/CrowsNest.app`
 
 Then check each, without opening the panel first:
 
 ```bash
 sleep 20
-ls ~/.claude-fleet/cm/ | wc -l    # expect 1 -- background polling works
+ls ~/.crowsnest/cm/ | wc -l    # expect 1 -- background polling works
 ```
 
 Open the panel and confirm: winbox's sessions present; sessions grouped under one repo
@@ -1220,7 +1220,7 @@ only the Python standard library, so the requirements there are:
 
 Build with your own signing identity:
 
-    CLAUDE_FLEET_IDENTITY="Apple Development: you@example.com (TEAMID)" ./build.sh
+    CROWSNEST_IDENTITY="Apple Development: you@example.com (TEAMID)" ./build.sh
 
 **Background agents** (`claude --bg`) appear alongside interactive sessions. They are
 tagged `kind: "bg"` in the registry and their name is the task text they were started

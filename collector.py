@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-claude-fleet collector -- runs ON a host (local or remote), prints one JSON doc.
+crowsnest collector -- runs ON a host (local or remote), prints one JSON doc.
 
 Designed to be executed with zero installation:
 
@@ -505,7 +505,7 @@ def main():
         doc["ok"] = False
         doc["error"] = "%s: %s" % (type(exc).__name__, exc)
     # Markers let the poller find our JSON even if the login shell prints a banner.
-    sys.stdout.write("<<<CLAUDE_FLEET>>>" + json.dumps(doc) + "<<<END>>>\n")
+    sys.stdout.write("<<<CROWSNEST>>>" + json.dumps(doc) + "<<<END>>>\n")
 
 
 if __name__ == "__main__":

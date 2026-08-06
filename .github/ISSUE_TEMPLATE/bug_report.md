@@ -19,7 +19,7 @@ The app writes the real reason to disk, since it never shows errors in the list.
 Paste the output of:
 
 ```
-cat ~/.claude-fleet/last-poll.log
+cat ~/.crowsnest/last-poll.log
 ```
 
 <!-- paste here -->

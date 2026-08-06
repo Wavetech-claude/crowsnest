@@ -1,6 +1,6 @@
 # Support
 
-Claude Fleet is a personal tool, published as-is. Please read this before opening
+Crow's Nest is a personal tool, published as-is. Please read this before opening
 an issue — it will save us both time.
 
 ## What kind of support to expect
@@ -18,11 +18,11 @@ for it being free and MIT.
 
 ## The most useful thing you can attach
 
-When Claude Fleet can't reach a machine, it does **not** show the error in the list
+When Crow's Nest can't reach a machine, it does **not** show the error in the list
 (by design). It writes it to disk instead:
 
 ```bash
-cat ~/.claude-fleet/last-poll.log
+cat ~/.crowsnest/last-poll.log
 ```
 
 and shows it in **Settings → Diagnostics**. That one line is usually the whole

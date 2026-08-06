@@ -4,6 +4,36 @@ All notable changes are recorded here. This project uses [semantic
 versioning](https://semver.org): given `MAJOR.MINOR.PATCH`, breaking changes bump
 MAJOR, new features bump MINOR, fixes bump PATCH.
 
+## [Unreleased]
+
+### Changed
+- **Renamed: Claude Fleet → Crow's Nest.** The old name collided head-on with two
+  other projects called `claude-fleet` — both of which *orchestrate* Claude Code
+  agents. This one only ever watched them, so the name was selling the wrong thing.
+  The GitHub repo moved to `crowsnest`; the old URL redirects.
+- Bundle identifier is now `com.atwavetech.crowsnest` (was `com.sleek.claude-fleet`).
+
+### Breaking — local state only
+Upgrading from 1.0.0 resets settings and orphans the old state directory. Nothing is
+lost that isn't regenerated on the next poll, but the machine alias and refresh
+interval must be re-entered in Settings.
+
+- Preferences move: `~/Library/Preferences/com.sleek.claude-fleet.plist` →
+  `com.atwavetech.crowsnest.plist`. **Settings reset to defaults.**
+- State directory moves: `~/.claude-fleet/` → `~/.crowsnest/` (SSH control socket,
+  `last-poll.log`, `local-network.log`).
+- The app bundle is now `~/Applications/CrowsNest.app`. The old
+  `ClaudeFleet.app` is not removed by `build.sh` — delete it by hand, and re-point
+  your Login Item at the new bundle or it will keep launching the old one.
+- The fixture environment variable is now `CROWSNEST_FIXTURE`.
+
+To clean up after upgrading:
+
+```bash
+rm -rf ~/Applications/ClaudeFleet.app ~/.claude-fleet
+defaults delete com.sleek.claude-fleet 2>/dev/null || true
+```
+
 ## [1.0.0] — 2026-07-31
 
 First public release.
@@ -31,4 +61,4 @@ First public release.
   from every field. The SSH host key is not auto-trusted (`accept-new` is deliberately
   not set). See [docs/architecture.md](docs/architecture.md#security-model).
 
-[1.0.0]: https://github.com/Shubhamgupta2612/claude-fleet/releases/tag/v1.0.0
+[1.0.0]: https://github.com/Shubhamgupta2612/crowsnest/releases/tag/v1.0.0

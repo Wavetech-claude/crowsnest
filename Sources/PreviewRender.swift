@@ -5,7 +5,7 @@ import AppKit
 /// Offline renderer: rasterises the real MenuPanel to a PNG using the same
 /// views the app ships, so the UI can be verified without a screen.
 ///
-///     ClaudeFleetPreview <fixture.json> <out.png> [light|dark]
+///     CrowsNestPreview <fixture.json> <out.png> [light|dark]
 @main
 struct PreviewRender {
     @MainActor
@@ -19,7 +19,7 @@ struct PreviewRender {
         let output = args[2]
         let dark = args.count > 3 && args[3] == "dark"
 
-        setenv("CLAUDE_FLEET_FIXTURE", fixture, 1)
+        setenv("CROWSNEST_FIXTURE", fixture, 1)
         let result = await Collector.gather(host: "", includeLocal: false)
         let store = SessionStore(preloaded: result.groups)
 

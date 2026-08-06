@@ -1,4 +1,6 @@
-# Claude Fleet
+# Crow's Nest
+
+**See which Claude Code session is waiting on you.**
 
 A native macOS **menu bar** app that shows every Claude Code session you have
 running — on this Mac and on a remote machine over SSH — grouped by git repo, so
@@ -11,10 +13,11 @@ you can tell at a glance which one is stuck waiting on you.
 The one thing it exists to tell you: **which session is sitting at an unanswered
 permission prompt right now.** When Claude asks "can I run this command?" inside a
 window you're not looking at, that session freezes and you have no idea until you
-happen to switch to it. Claude Fleet puts that in your menu bar — and when a session
+happen to switch to it. Crow's Nest puts that in your menu bar — and when a session
 starts needing you, it jumps to the top.
 
-<sub>An independent, community-built tool. Not affiliated with, or endorsed by, Anthropic.</sub>
+<sub>Built at <a href="https://www.atwavetech.com">Wave Tech</a> and released under MIT.
+An independent, community-built tool. Not affiliated with, or endorsed by, Anthropic.</sub>
 
 ---
 
@@ -29,7 +32,7 @@ starts needing you, it jumps to the top.
 > what you need, fork it — that's what the licence is for.
 >
 > When it does break, it breaks *loudly*: the reason lands in **Settings →
-> Diagnostics** and in `~/.claude-fleet/last-poll.log`. Please include that in any
+> Diagnostics** and in `~/.crowsnest/last-poll.log`. Please include that in any
 > issue. See [SUPPORT.md](SUPPORT.md).
 
 ---
@@ -66,21 +69,21 @@ sessions that need you now (**Needs approval** + **Your turn**).
 Requires macOS 14+ and the Xcode command line tools (`xcode-select --install`).
 
 ```bash
-git clone <this-repo> claude-fleet
-cd claude-fleet
+git clone <this-repo> crowsnest
+cd crowsnest
 ./build.sh
-open ~/Applications/ClaudeFleet.app
+open ~/Applications/CrowsNest.app
 ```
 
 `build.sh` compiles, signs (ad-hoc by default — no Apple account needed), and installs
-to `~/Applications/ClaudeFleet.app`. It's an `LSUIElement` app: menu bar only, no Dock
+to `~/Applications/CrowsNest.app`. It's an `LSUIElement` app: menu bar only, no Dock
 icon, no app-switcher entry.
 
 **Start at login:** System Settings → General → Login Items → **+** →
-`~/Applications/ClaudeFleet.app`. (Documented rather than done for you, so nothing
+`~/Applications/CrowsNest.app`. (Documented rather than done for you, so nothing
 adds itself to your login silently.)
 
-**On first launch**, macOS asks to allow Claude Fleet to access devices on your local
+**On first launch**, macOS asks to allow Crow's Nest to access devices on your local
 network — **click Allow**, or the remote machine can never be reached. See
 [docs/troubleshooting.md](docs/troubleshooting.md) if no prompt appears.
 
@@ -101,7 +104,7 @@ including Windows hosts.
 ## How it works, briefly
 
 ```
-ClaudeFleet.app  ──every 15s──▶  python3 collector.py            (this Mac)
+CrowsNest.app  ──every 15s──▶  python3 collector.py            (this Mac)
                  ──every 15s──▶  ssh <host> '<py|python3> -' < collector.py   (remote)
                         │
                         └─▶  framed JSON  ──▶  repo groups  ──▶  menu bar
@@ -130,7 +133,7 @@ Offline preview — rasterises the real panel to a PNG, no screen needed:
 
 ```bash
 swiftc -O -parse-as-library -DPREVIEW -target arm64-apple-macos14.0 \
-    -o /tmp/cfpreview Sources/*.swift && /tmp/cfpreview fixture.json /tmp/panel.png dark
+    -o /tmp/cnpreview Sources/*.swift && /tmp/cnpreview fixture.json /tmp/panel.png dark
 ```
 
 Tests:
@@ -141,4 +144,4 @@ python3 -m unittest discover -s tests -t tests   # collector logic
 ```
 
 `fixture.json` is a synthetic multi-repo snapshot; the same file drives the app itself
-via `CLAUDE_FLEET_FIXTURE=/path/to/fixture.json`, bypassing SSH entirely.
+via `CROWSNEST_FIXTURE=/path/to/fixture.json`, bypassing SSH entirely.

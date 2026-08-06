@@ -147,7 +147,7 @@ enum Collector {
     static func gather(host: String, includeLocal: Bool) async -> Result {
         // A fixture short-circuits the transport entirely, so the UI can be
         // built and verified when the machine is off-network.
-        if let fixture = ProcessInfo.processInfo.environment["CLAUDE_FLEET_FIXTURE"],
+        if let fixture = ProcessInfo.processInfo.environment["CROWSNEST_FIXTURE"],
            let data = FileManager.default.contents(atPath: fixture) {
             let payload = decode(data)
             let sessions = payload?.sessions ?? []
@@ -269,7 +269,7 @@ enum Collector {
     /// One file, overwritten each poll, no history to grow unbounded.
     fileprivate static func record(_ error: String?, sessionCount: Int) {
         let dir = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".claude-fleet", isDirectory: true)
+            .appendingPathComponent(".crowsnest", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let line = """
         polled: \(ISO8601DateFormatter().string(from: Date()))
@@ -300,7 +300,7 @@ enum Collector {
 
     private static var controlPath: String {
         let dir = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".claude-fleet/cm", isDirectory: true)
+            .appendingPathComponent(".crowsnest/cm", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appendingPathComponent("%r@%h:%p").path
     }
@@ -375,7 +375,7 @@ enum Collector {
                     // of a bare exit code, which is the difference between a
                     // diagnosable problem and a silently empty list.
                     var errData = Data()
-                    let errQueue = DispatchQueue(label: "claude-fleet.stderr")
+                    let errQueue = DispatchQueue(label: "crowsnest.stderr")
                     let errDone = DispatchSemaphore(value: 0)
                     errQueue.async {
                         errData = errPipe.fileHandleForReading.readDataToEndOfFile()
@@ -411,7 +411,7 @@ enum Collector {
     /// didn't decode.
     private static func decode(_ data: Data) -> CollectorPayload? {
         guard let text = String(data: data, encoding: .utf8),
-              let start = text.range(of: "<<<CLAUDE_FLEET>>>"),
+              let start = text.range(of: "<<<CROWSNEST>>>"),
               let end = text.range(of: "<<<END>>>", range: start.upperBound..<text.endIndex)
         else { return nil }
 

@@ -1,4 +1,4 @@
-# Claude Fleet — hardening design
+# Crow's Nest — hardening design
 
 > Date: 2026-07-30
 > Status: approved, ready for implementation planning
@@ -79,7 +79,7 @@ stdout, the probe would have mistaken it for real output.
 ## 5. Architecture
 
 ```
-ClaudeFleet.app
+CrowsNest.app
   └── AppDelegate              owns the store; starts polling at launch
         ├── LocalNetworkPermission   primes the macOS LAN grant (§5.0)
         └── SessionStore             poll loop, publishes [RepoGroup]
@@ -139,7 +139,7 @@ path, or it proves nothing.
 `collector.py` is stdlib-only, bundled in `Contents/Resources`, and **piped to winbox over
 stdin**. Nothing is installed on winbox and nothing needs to be kept in sync there.
 
-Output is bracketed with `<<<CLAUDE_FLEET>>> … <<<END>>>` so a login banner cannot corrupt
+Output is bracketed with `<<<CROWSNEST>>> … <<<END>>>` so a login banner cannot corrupt
 the parse. This framing also distinguishes *"ran fine, no sessions"* from *"wrong
 interpreter"* — the distinction the interpreter probe depends on.
 
@@ -356,7 +356,7 @@ This feature is **dependent on §7** — without background polling it can never
 - `LSUIElement: true` — menu bar only.
 
 Login-at-start is **documented, not silently configured**:
-System Settings → General → Login Items → **+** → `~/Applications/ClaudeFleet.app`.
+System Settings → General → Login Items → **+** → `~/Applications/CrowsNest.app`.
 
 ## 13. Testing
 
