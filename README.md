@@ -4,7 +4,11 @@
 
 A native macOS **menu bar** app that shows every Claude Code session you have
 running — on this Mac and on a remote machine over SSH — most urgent first, so
-you can tell at a glance which one is stuck waiting on you.
+you can tell at a glance which one is stuck waiting on you. **Then click it:** the
+command that reopens that exact conversation in its own folder
+(`cd '<dir>' && claude --resume <id>`) is on your clipboard. Paste it into a terminal
+on that machine and you're back in the session, with its full history, without
+hunting for the window or the session id.
 
 <p align="center">
   <img src="docs/images/demo.gif" width="420" alt="A session hits a permission prompt and jumps to the top of the list">
