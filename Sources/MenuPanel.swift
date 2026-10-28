@@ -8,9 +8,13 @@ struct MenuPanel: View {
     var scrolls: Bool = true
     @State private var showingSettings = false
     @State private var listHeight: CGFloat = 0
+    /// The session whose resume command was just copied: its card reads
+    /// "Copied" in place of its age for a moment.
+    @State private var copiedId: String?
+    @State private var clearCopied: DispatchWorkItem?
 
     /// Tallest the list may grow before it starts scrolling.
-    private let maxListHeight: CGFloat = 420
+    private let maxListHeight: CGFloat = 460
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -45,58 +49,79 @@ struct MenuPanel: View {
             Divider()
             footer
         }
-        .frame(width: 340)
+        .frame(width: 360)
         .sheet(isPresented: $showingSettings) {
             SettingsPanel(store: store, isPresented: $showingSettings)
         }
     }
 
-    /// A plain VStack, not Lazy: the list is a handful of rows, so laziness
-    /// buys nothing and only complicates layout.
+    /// Every session, most urgent first. What needs you is a full-width card;
+    /// everything else is a tile, two to a row. The repository is named on each
+    /// card instead of as a group header, so urgency, not repository, decides
+    /// the order.
     private var sessionList: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            ForEach(store.groups) { group in
-                RepoSection(group: group)
+        let items = SessionItem.ranked(store.groups)
+        let hot = items.filter { $0.session.state.wantsAttention }
+        let calm = items.filter { !$0.session.state.wantsAttention }
+        let rows = stride(from: 0, to: calm.count, by: 2).map { Array(calm[$0..<min($0 + 2, calm.count)]) }
+
+        return VStack(spacing: 8) {
+            ForEach(hot) { item in
+                AttentionCard(item: item, copied: copiedId == item.id) { copyResume(item) }
+            }
+            ForEach(rows.indices, id: \.self) { r in
+                HStack(spacing: 8) {
+                    ForEach(rows[r]) { item in
+                        SessionTile(item: item, copied: copiedId == item.id) { copyResume(item) }
+                    }
+                    if rows[r].count == 1 { Color.clear.frame(maxWidth: .infinity) }
+                }
             }
         }
-        .padding(.vertical, 12)
+        .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var header: some View {
         HStack(spacing: 6) {
             Text("Claude Sessions")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(.headline, design: .rounded))
             Spacer()
-            if store.isRefreshing {
-                ProgressView()
-                    .controlSize(.small)
-                    .scaleEffect(0.7)
-                    .frame(width: 14, height: 14)
-            } else {
-                Button {
-                    store.refreshSoon()
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 11, weight: .medium))
+            Group {
+                if store.isRefreshing {
+                    ProgressView()
+                        .controlSize(.small)
+                        .scaleEffect(0.7)
+                } else {
+                    Button {
+                        store.refreshSoon()
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.panelSecondary)
+                            .frame(width: 26, height: 26)
+                            .background(Circle().fill(Color.panelText.opacity(0.06)))
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .help("Refresh")
+                    .accessibilityLabel("Refresh")
                 }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                .help("Refresh")
             }
+            .frame(width: 26, height: 26)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.vertical, 9)
     }
 
     private var emptyState: some View {
         VStack(spacing: 6) {
             Image(systemName: "moon.zzz")
                 .font(.system(size: 22, weight: .light))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(Color.panelSecondary)
             Text("No active sessions")
-                .font(.system(size: 12))
-                .foregroundStyle(.secondary)
+                .font(.callout)
+                .foregroundStyle(Color.panelSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 34)
@@ -104,123 +129,44 @@ struct MenuPanel: View {
 
     private var footer: some View {
         HStack(spacing: 0) {
-            FooterButton(title: "Settings…") { showingSettings = true }
+            FooterButton(title: "Settings…", symbol: "gearshape") { showingSettings = true }
             Spacer()
-            FooterButton(title: "Quit") { NSApplication.shared.terminate(nil) }
+            FooterButton(title: "Quit", symbol: nil) { NSApplication.shared.terminate(nil) }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
     }
-}
 
-private struct FooterButton: View {
-    let title: String
-    let action: () -> Void
-    @State private var hovering = false
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 12))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(
-                    RoundedRectangle(cornerRadius: 5, style: .continuous)
-                        .fill(hovering ? Color.primary.opacity(0.08) : .clear)
-                )
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering = $0 }
+    private func copyResume(_ item: SessionItem) {
+        Pasteboard.copy(item.resumeCommand)
+        copiedId = item.id
+        clearCopied?.cancel()
+        let reset = DispatchWorkItem { copiedId = nil }
+        clearCopied = reset
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6, execute: reset)
     }
 }
 
-struct RepoSection: View {
-    let group: RepoGroup
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack(spacing: 5) {
-                Image(systemName: "folder")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(.tertiary)
-                Text(group.name)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                Text("\(group.sessions.count)")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(.tertiary)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 1)
-                    .background(Capsule().fill(Color.primary.opacity(0.06)))
-            }
-            .padding(.horizontal, 14)
-            .padding(.bottom, 2)
-
-            ForEach(group.sessions) { session in
-                SessionRow(session: session, repoPath: group.path)
-            }
-        }
-    }
-}
-
-struct SessionRow: View {
+/// A session together with the repository it was found in.
+struct SessionItem: Identifiable {
     let session: Session
+    let repoName: String
     let repoPath: String
-    @State private var hovering = false
 
-    var body: some View {
-        HStack(alignment: .top, spacing: 9) {
-            Circle()
-                .fill(session.state.tint)
-                .frame(width: 7, height: 7)
-                .padding(.top, 5)
+    var id: String { session.id }
 
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(session.title)
-                        .font(.system(size: 12.5, weight: .medium))
-                        .lineLimit(1)
-                    Spacer(minLength: 4)
-                    Text(session.age)
-                        .font(.system(size: 10.5))
-                        .foregroundStyle(.tertiary)
-                        .monospacedDigit()
-                }
-
-                Text(session.state.label)
-                    .font(.system(size: 10.5))
-                    .foregroundStyle(session.state.wantsAttention ? session.state.tint : .secondary)
-
-                if !metadata.isEmpty {
-                    Text(metadata)
-                        .font(.system(size: 10))
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(1)
-                }
-            }
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 5)
-        .background(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(hovering ? Color.primary.opacity(0.06) : .clear)
-                .padding(.horizontal, 8)
-        )
-        .contentShape(Rectangle())
-        .onHover { hovering = $0 }
-        .help(session.stateReason ?? session.state.label)
-        .contextMenu {
-            Button("Copy Resume Command") { copy(resumeCommand) }
-            Button("Copy Path") { copy(Shell.quote(session.cwd ?? repoPath)) }
-        }
+    /// Most urgent first; sessions of the same state keep the collector's order.
+    static func ranked(_ groups: [RepoGroup]) -> [SessionItem] {
+        groups.flatMap { g in g.sessions.map { SessionItem(session: $0, repoName: g.name, repoPath: g.path) } }
+            .enumerated()
+            .sorted { ($0.element.session.state.rank, $0.offset) < ($1.element.session.state.rank, $1.offset) }
+            .map(\.element)
     }
 
-    private var metadata: String {
-        var bits: [String] = []
-        if let model = session.shortModel { bits.append(model) }
-        if let context = session.contextLabel { bits.append(context) }
-        if let branch = session.gitBranch, !branch.isEmpty, branch != "HEAD" { bits.append(branch) }
-        return bits.joined(separator: " · ")
+    /// "repo · branch", the branch left out when there isn't a real one.
+    var place: String {
+        guard let branch = session.gitBranch, !branch.isEmpty, branch != "HEAD" else { return repoName }
+        return "\(repoName) · \(branch)"
     }
 
     /// A command the owner pastes into a terminal. Every interpolated value --
@@ -228,13 +174,241 @@ struct SessionRow: View {
     /// machine, so a compromised or shared host could otherwise smuggle shell
     /// metacharacters straight into a command the owner runs on their own Mac.
     /// Both are shell-quoted; `sessionId` is additionally validated at decode.
-    private var resumeCommand: String {
+    var resumeCommand: String {
         "cd \(Shell.quote(session.cwd ?? repoPath)) && claude --resume \(Shell.quote(session.sessionId))"
     }
 
-    private func copy(_ text: String) {
+    var quotedPath: String { Shell.quote(session.cwd ?? repoPath) }
+
+    var spokenLabel: String {
+        "\(session.title), \(session.state.label), \(place), \(session.age) ago"
+    }
+}
+
+private enum Pasteboard {
+    static func copy(_ text: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
+    }
+}
+
+/// A session that needs you: a full-width card in its state's tint.
+private struct AttentionCard: View {
+    let item: SessionItem
+    let copied: Bool
+    let onCopy: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        let s = item.session
+        let tint = Color.stateTint(s.state)
+        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+
+        Button(action: onCopy) {
+            HStack(alignment: .top, spacing: 12) {
+                StateDisc(state: s.state, size: 36)
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text(s.state.label)
+                            .font(.system(.caption, design: .rounded).weight(.heavy))
+                            .foregroundStyle(Color.panelText)
+                        Spacer(minLength: 4)
+                        AgeOrCopied(age: s.age, copied: copied)
+                    }
+                    Text(s.title)
+                        .font(.system(.title3, design: .rounded).weight(.bold))
+                        .foregroundStyle(Color.panelText)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Text(item.place)
+                        .font(.caption)
+                        .foregroundStyle(Color.panelSecondary)
+                        .lineLimit(1)
+                    if let percent = s.contextPercent {
+                        ContextBar(percent: percent).padding(.top, 3)
+                    }
+                }
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(shape.fill(LinearGradient(colors: [tint.opacity(Palette.cardTintStrong),
+                                                           tint.opacity(Palette.cardTintWeak)],
+                                                  startPoint: .topLeading, endPoint: .bottomTrailing)))
+            .overlay(shape.strokeBorder(Color.panelText.opacity(hovering ? 0.2 : 0), lineWidth: 1))
+            .contentShape(shape)
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .help(s.stateReason ?? s.state.label)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(item.spokenLabel)
+        .accessibilityHint("Copies the resume command")
+        .accessibilityAddTraits(.isButton)
+        .contextMenu { RowActions(item: item) }
+    }
+}
+
+/// A session that doesn't need you: a small tile, two to a row.
+private struct SessionTile: View {
+    let item: SessionItem
+    let copied: Bool
+    let onCopy: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        let s = item.session
+        let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+
+        Button(action: onCopy) {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 6) {
+                    StateDisc(state: s.state, size: 22)
+                    Spacer(minLength: 4)
+                    AgeOrCopied(age: s.age, copied: copied)
+                }
+                Text(s.title)
+                    .font(.system(.callout, design: .rounded).weight(.semibold))
+                    .foregroundStyle(Color.panelText)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Text("\(s.state.label) · \(item.repoName)")
+                    .font(.caption)
+                    .foregroundStyle(Color.panelSecondary)
+                    .lineLimit(1)
+                if let percent = s.contextPercent {
+                    ContextBar(percent: percent)
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(shape.fill(Color.panelText.opacity(hovering ? Palette.tileFill * 2 : Palette.tileFill)))
+            .contentShape(shape)
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
+        .onHover { hovering = $0 }
+        .help(s.stateReason ?? s.state.label)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(item.spokenLabel)
+        .accessibilityHint("Copies the resume command")
+        .accessibilityAddTraits(.isButton)
+        .contextMenu { RowActions(item: item) }
+    }
+}
+
+private struct RowActions: View {
+    let item: SessionItem
+    var body: some View {
+        Button("Copy Resume Command") { Pasteboard.copy(item.resumeCommand) }
+        Button("Copy Path") { Pasteboard.copy(item.quotedPath) }
+    }
+}
+
+/// The state as a shape as well as a colour: a filled disc with the state's
+/// glyph, so the state reads without the tint.
+private struct StateDisc: View {
+    let state: Session.State
+    let size: CGFloat
+
+    private var symbol: String {
+        switch state {
+        case .blocked: "hand.raised.fill"
+        case .waiting: "text.bubble.fill"
+        case .working: "bolt.fill"
+        case .idle:    "moon.fill"
+        case .unknown: "questionmark"
+        }
+    }
+
+    var body: some View {
+        let bright = Palette.isBright(state)
+        ZStack {
+            if bright {
+                Circle().fill(Color.stateTint(state).gradient)
+            } else {
+                Circle().fill(Color.panelText.opacity(Palette.quietDiscFill))
+            }
+            Image(systemName: symbol)
+                .font(.system(size: size * 0.43, weight: .bold))
+                .foregroundStyle(bright ? Color(nsColor: Palette.glyphOnTint) : Color.panelSecondary)
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+    }
+}
+
+/// How full the session's context window is: a bar plus the number. Red at
+/// `Palette.contextWarnPercent` and above, when a fresh start is near.
+private struct ContextBar: View {
+    let percent: Int
+
+    var body: some View {
+        HStack(spacing: 6) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.panelText.opacity(0.09))
+                    Capsule()
+                        .fill(percent >= Palette.contextWarnPercent ? Color(nsColor: .systemRed)
+                                                                     : Color.panelText.opacity(0.4))
+                        .frame(width: geo.size.width * CGFloat(min(max(percent, 0), 100)) / 100)
+                }
+            }
+            .frame(height: 4)
+            Text("\(percent)%")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(Color.panelSecondary)
+                .monospacedDigit()
+                .frame(width: 32, alignment: .trailing)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Context \(percent) percent full")
+    }
+}
+
+private struct AgeOrCopied: View {
+    let age: String
+    let copied: Bool
+
+    var body: some View {
+        if copied {
+            Label("Copied", systemImage: "checkmark")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Color.panelSecondary)
+        } else {
+            Text(age)
+                .font(.caption)
+                .foregroundStyle(Color.panelSecondary)
+                .monospacedDigit()
+        }
+    }
+}
+
+private struct FooterButton: View {
+    let title: String
+    let symbol: String?
+    let action: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if let symbol {
+                    Label(title, systemImage: symbol)
+                } else {
+                    Text(title)
+                }
+            }
+            .font(.callout)
+            .foregroundStyle(Color.panelSecondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                    .fill(hovering ? Color.panelText.opacity(0.08) : .clear)
+            )
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
     }
 }
 
@@ -245,7 +419,7 @@ struct SettingsPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Settings")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.headline)
 
             Form {
                 TextField("Machine", text: $store.host)
@@ -267,24 +441,24 @@ struct SettingsPanel: View {
             // shows transport state, counts, or errors.
             VStack(alignment: .leading, spacing: 3) {
                 Text("Diagnostics")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.panelSecondary)
 
                 Text("\(store.collected) collected · \(store.hidden.count) hidden")
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(.tertiary)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(Color.panelSecondary)
 
                 ForEach(store.hidden) { item in
                     Text("• \(item.reason)")
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundStyle(.tertiary)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundStyle(Color.panelSecondary)
                         .lineLimit(1)
                 }
 
                 if let error = store.lastError {
                     Text(error)
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundStyle(.tertiary)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundStyle(Color.panelSecondary)
                         .textSelection(.enabled)
                         .lineLimit(4)
                 }

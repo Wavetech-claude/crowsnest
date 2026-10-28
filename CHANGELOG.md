@@ -6,6 +6,39 @@ MAJOR, new features bump MINOR, fixes bump PATCH.
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-10-28
+
+A new look for the panel, built around one question: is anything waiting on me?
+
+### Added
+- **The Tiles panel.** Every session that needs you is now a full-width card at the top,
+  in that state's colour, with its name in large type. The rest (Working, Idle) are
+  smaller tiles, two to a row underneath. Urgency decides the order: an approval comes
+  first, then your turns, wherever they are. The repo and branch are on each card rather
+  than in group headers.
+- **State icons.** Each state has its own icon in a filled disc (a raised hand for
+  approval, a speech bubble for your turn, a bolt for working, a moon for idle), so the
+  state reads by shape as well as colour.
+- **Context gauge.** Each session shows how full its context window is as a bar and a
+  percentage. The bar turns red at 85%, when the session is close to needing a fresh start.
+- **Click to copy.** Clicking any card or tile copies its resume command
+  (`cd '<dir>' && claude --resume <id>`), and the card confirms with "✓ Copied". The
+  right-click menu stays, with Copy Path.
+- **A contrast check.** `swift-tests/run.sh` now holds every text colour in the panel to
+  4.5:1 against everything it sits on, in light, dark and both Increase Contrast
+  appearances, and runs on every pull request. It caught one failure in this release
+  before it shipped: grey text on the yellow card in dark mode.
+
+### Fixed
+- "Needs approval" and "Your turn" were unreadable in light mode (yellow text on white
+  measured 1.41:1, orange 2.16:1, against the 4.5:1 small text needs). The words are
+  now in the text colour, and the colour is on the icon and the card.
+- The grey supporting text (age, model, branch) measured under 3:1 in both appearances.
+  It now passes 4.5:1 everywhere.
+- The refresh button was a 13 pt target with no name for VoiceOver. It is now 26 pt and
+  announced as "Refresh". Each card is read out as one button: the name, the state, the
+  repo and the age.
+
 ### Changed
 - **Renamed: Claude Fleet → Crow's Nest.** The old name collided head-on with two
   other projects called `claude-fleet` — both of which *orchestrate* Claude Code

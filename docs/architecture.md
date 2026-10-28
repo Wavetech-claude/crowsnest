@@ -77,7 +77,8 @@ as `live` — failing toward showing, never toward hiding.
 | `CrowsNestApp.swift` | The `MenuBarExtra` scene + `AppDelegate`; starts polling at launch |
 | `SessionStore.swift` | The poll loop, the two SSH/local transports, JSON decode, diagnostics |
 | `Session.swift` | The decoded model, input sanitisation, and `Shell.quote` |
-| `MenuPanel.swift` | The panel: repo sections, rows, settings, right-click actions |
+| `MenuPanel.swift` | The panel: attention cards, session tiles, settings, click and right-click actions |
+| `Palette.swift` | Every colour the panel draws text in or on, held to WCAG contrast by `swift-tests/ContrastTests.swift` |
 | `Notifier.swift` | Fires once when a session *enters* a state that wants you |
 | `LocalNetworkPermission.swift` | Holds an `NWConnection` open at launch to trigger the macOS LAN prompt |
 | `PreviewRender.swift` | Offline renderer (`-DPREVIEW`) that rasterises the real panel to PNG |

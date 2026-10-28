@@ -132,15 +132,6 @@ struct Session: Decodable, Identifiable, Sendable, Equatable {
             }
         }
 
-        var tint: Color {
-            switch self {
-            case .blocked: .orange
-            case .waiting: .yellow
-            case .working: .green
-            case .idle, .unknown: .secondary
-            }
-        }
-
         var wantsAttention: Bool { self == .blocked || self == .waiting }
 
         var label: String {

@@ -3,7 +3,7 @@
 **See which Claude Code session is waiting on you.**
 
 A native macOS **menu bar** app that shows every Claude Code session you have
-running — on this Mac and on a remote machine over SSH — grouped by git repo, so
+running — on this Mac and on a remote machine over SSH — most urgent first, so
 you can tell at a glance which one is stuck waiting on you.
 
 <p align="center">
@@ -39,29 +39,29 @@ An independent, community-built tool. Not affiliated with, or endorsed by, Anthr
 
 ## What it shows
 
-Sessions. That's it — grouped by the git repo they're in.
+Sessions. That's it — most urgent first, each labelled with the git repo it's in.
 
 No machine names, no connection status, no error rows, no "unreachable" warnings.
 If the remote machine is off-network the list is simply **empty and calm**.
 Anything the app can't reach, or chooses to hide, is explained only in **Settings →
 Diagnostics** — never in the session list itself.
 
-Grouping is by **git repo**, not by directory: sessions in `acme-web`,
-`acme-web/services/api` and `acme-web/worker` collapse into one `acme-web` group
-rather than scattering into three. The row shows the path within the repo so you can
-still tell subfolder sessions apart.
+Sessions are labelled by **git repo**, not by directory: sessions in `acme-web`,
+`acme-web/services/api` and `acme-web/worker` all read `acme-web` rather than
+three different names. The session's own name tells subfolder sessions apart.
 
 ### The states
 
-| dot | state | meaning |
+| icon | state | meaning |
 |---|---|---|
-| 🟠 | **Needs approval** | A tool call was issued and nothing has moved since — an unanswered permission prompt. **This is the state the app is for.** |
-| 🟡 | **Your turn** | Claude finished its turn and is waiting for you to type something |
-| 🟢 | **Working** | A tool call is in flight and the transcript is actively moving |
-| ⚪️ | **Idle** | A "your turn" session you walked away from — grey, de-emphasised, uncounted |
+| 🟠 ✋ | **Needs approval** | A tool call was issued and nothing has moved since — an unanswered permission prompt. **This is the state the app is for.** |
+| 🟡 💬 | **Your turn** | Claude finished its turn and is waiting for you to type something |
+| 🟢 ⚡ | **Working** | A tool call is in flight and the transcript is actively moving |
+| ⚪️ 🌙 | **Idle** | A "your turn" session you walked away from — grey, de-emphasised, uncounted |
 
-Repos containing a **Needs approval** session float to the top, so the thing that
-needs you is always the first thing you see. The menu bar badge counts only the
+**Needs approval** sessions come first, then **Your turn**, as full-width cards in
+their colour, so the thing that needs you is always the first thing you see. Working
+and idle sessions sit below as smaller tiles. The menu bar badge counts only the
 sessions that need you now (**Needs approval** + **Your turn**).
 
 ## Install
@@ -121,7 +121,7 @@ The full design, and the traps that make it non-trivial, are in
 
 ## Documentation
 
-- **[User guide](docs/user-guide.md)** — setup, Windows hosts, background agents, the right-click actions
+- **[User guide](docs/user-guide.md)** — setup, Windows hosts, background agents, what a click and a right-click do
 - **[Architecture](docs/architecture.md)** — the collector/app split, state derivation, liveness, the security model
 - **[Traps](docs/traps.md)** — the hard-won gotchas: the Store-stub Python, the macOS Local Network deadlock, the SSH control-socket that makes every test lie
 - **[Troubleshooting](docs/troubleshooting.md)** — empty list, no prompt, notifications
