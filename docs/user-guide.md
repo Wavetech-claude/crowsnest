@@ -3,13 +3,24 @@
 ## Reading the panel
 
 <p align="center">
-  <img src="images/panel-dark.png" width="360" alt="The panel: sessions grouped by repo">
+  <img src="images/panel-dark.png" width="360" alt="The panel: a Needs approval card and two Your turn cards">
 </p>
 
-Sessions are grouped under the git repo they're in, and the repo with something needing
-you sorts to the top. Each row shows, quietly, in order: a coloured state dot, the session
-name, how long since it last did anything, the state in words, and then `model · context ·
-branch`. The state is the headline; everything else is secondary and greyed.
+Every session is on screen at once, most urgent first. A session that needs you
+(**Needs approval**, then **Your turn**) is a full-width card in that state's colour: the
+state in words, the session name in large type, its repo and branch, how long since it
+last did anything, and a bar showing how full its context window is. Everything else
+(**Working**, **Idle**) is a smaller tile, two to a row, with the same facts.
+
+Each state also has its own icon in the disc: a raised hand for approval, a speech bubble
+for your turn, a bolt for working, a moon for idle. You can tell the states apart without
+relying on colour. The context bar turns red at 85%, when a session is close to needing a
+fresh start.
+
+### Click a session
+
+Clicking a card or tile copies its resume command, `cd '<dir>' && claude --resume <id>`,
+ready to paste into a terminal. The age briefly reads **✓ Copied** to confirm.
 
 The **menu bar icon** carries a count of the sessions that need you now (**Needs approval**
 + **Your turn**) and its glyph reflects the most urgent state across everything. When
@@ -17,8 +28,7 @@ nothing needs you, there's no number.
 
 ### Right-click a session
 
-- **Copy Resume Command** — copies `cd '<dir>' && claude --resume <id>`, ready to paste
-  into a terminal to pick that session back up. (The path and id are shell-quoted, because
+- **Copy Resume Command**: the same as a click. (The path and id are shell-quoted, because
   they come from the remote machine.)
 - **Copy Path** — copies the session's working directory.
 

@@ -8,8 +8,14 @@ There are two test suites and both must stay green:
 
 ```bash
 python3 -m unittest discover -s tests -t tests   # collector.py logic — 18 checks
-./swift-tests/run.sh                              # Notifier state machine + security — 17 checks
+./swift-tests/run.sh                              # Notifier state machine + security, then panel contrast
 ```
+
+**Every colour in the panel comes from `Sources/Palette.swift`.** `swift-tests/ContrastTests.swift`
+holds each text colour on each surface to 4.5:1 (and each state glyph to 3:1) in light, dark
+and both Increase Contrast appearances, and `run.sh` fails if `MenuPanel.swift` uses
+`.secondary`, `.tertiary` or a raw system colour, because the check cannot see those. A new
+colour goes into `Palette` and into the check, or it doesn't go in.
 
 CI runs both suites and `build.sh` on every pull request (`.github/workflows/ci.yml`, job
 `checks`), and `main` only accepts a change whose `checks` passed.

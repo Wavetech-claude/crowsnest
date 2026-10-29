@@ -32,8 +32,8 @@ struct PreviewRender {
         }
 
         let view = MenuPanel(store: store, scrolls: false)
+            .background(Color(nsColor: Palette.panel))
             .environment(\.colorScheme, dark ? .dark : .light)
-            .background(dark ? Color(white: 0.13) : Color(white: 0.97))
 
         let renderer = ImageRenderer(content: view)
         renderer.scale = 2
