@@ -18,27 +18,20 @@ Two numbers live in `build.sh`'s Info.plist and must both bump on a release:
 
 ## Cutting a release
 
-This repo has two remotes with different histories: **Forgejo** (`main`, full commit
-history, private) and **GitHub** (`main`, one squashed clean commit, the public face).
-Releases are cut on the GitHub side.
+Releases are cut by the project's CI/CD, not by hand. There is one remote, GitHub, and one
+history.
 
-1. Land your changes on `main` and update `CHANGELOG.md` (move items under a new
-   `## [x.y.z] — YYYY-MM-DD` heading) and the two version numbers in `build.sh`.
-2. Push the full history to Forgejo: `git push forgejo main`.
-3. Rebuild the clean public commit and push it to GitHub:
-   ```bash
-   git checkout github-clean && git checkout main -- . && git add -A
-   git commit --amend --no-edit
-   git push -f github github-clean:main
-   git checkout main
-   ```
-4. Tag and release on GitHub:
-   ```bash
-   git tag -a vX.Y.Z github-clean -m "Crow's Nest X.Y.Z"
-   git push github vX.Y.Z
-   gh release create vX.Y.Z --repo <owner>/crowsnest --title "Crow's Nest X.Y.Z" \
-       --notes-file <(sed -n '/## \[X.Y.Z\]/,/## \[/p' CHANGELOG.md)
-   ```
+1. The pull request that should ship raises the version: both numbers in `build.sh`
+   (above), and its `CHANGELOG.md` entries moved under a new `## [x.y.z] — YYYY-MM-DD`
+   heading. Write that section for users: it becomes the release notes word for word.
+2. CI (`.github/workflows/ci.yml`, job `checks`) must pass and the change is reviewed.
+   Only the project's merge bot can merge into `main`; nobody pushes to it directly.
+3. When a merge raises the version above every existing tag, the maintainer is asked to
+   approve the release. On approval the merge bot tags the merged commit `vX.Y.Z` and a
+   GitHub Release is published with that version's `CHANGELOG.md` section as its notes.
+
+A merge that doesn't raise the version releases nothing, so documentation and small
+fixes can land without a release.
 
 ## Distribution — the honest state
 
