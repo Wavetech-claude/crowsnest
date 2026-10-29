@@ -41,6 +41,18 @@ swiftc -O -parse-as-library -DPREVIEW -target arm64-apple-macos14.0 \
    notifier, the payload decode). Treat missing data as *unknown* and fail toward
    showing the session, never toward hiding it.
 
+## UI changes
+
+Check any change to the panel or the menu bar glyph against Apple's Human Interface Guidelines.
+The last review, its measurements and what is still open are in
+[`docs/design-review-2026-10-27.md`](docs/design-review-2026-10-27.md); keep the contrast numbers
+there true (text up to 17 pt needs 4.5:1) by re-rendering both appearances with `PreviewRender`.
+
+Coding agents: the review was written with the
+[`apple-design`](https://github.com/dickwu/apple-design-skill) Claude Code skill. Use it for UI
+work if your environment has it installed. It is not vendored here: the upstream carries no
+licence.
+
 ## What's unlikely to be merged
 
 - **Support for a platform I can't test.** If you add Linux-remote or a different SSH
