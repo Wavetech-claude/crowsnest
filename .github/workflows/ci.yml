@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    # This job's name is the required status check on `main`. Rename it and
+    # branch protection waits forever for a check that no longer reports.
+    name: checks
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # A change that touches only documentation still reports this check (a
+      # required check that never reports blocks the merge), but skips the
+      # build and both suites.
+      - name: Detect a documentation-only change
+        id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then base="$PR_BASE"; else base="$PUSH_BEFORE"; fi
+          docs_only=false
+          if [ -n "$base" ] && [ "$base" != "0000000000000000000000000000000000000000" ]; then
+            changed="$(git diff --name-only "$base" HEAD)"
+            if [ -n "$changed" ] && ! printf '%s\n' "$changed" | grep -qvE '(\.md$|^docs/|^LICENSE$)'; then
+              docs_only=true
+            fi
+          fi
+          echo "docs_only=$docs_only" >> "$GITHUB_OUTPUT"
+          echo "documentation only: $docs_only"
+
+      - name: Collector tests (Python)
+        if: steps.scope.outputs.docs_only != 'true'
+        run: python3 -m unittest discover -s tests -t tests -v
+
+      - name: Notifier tests (Swift)
+        if: steps.scope.outputs.docs_only != 'true'
+        run: ./swift-tests/run.sh
+
+      - name: Build the app
+        if: steps.scope.outputs.docs_only != 'true'
+        env:
+          CROWSNEST_DEST: ${{ runner.temp }}/app
+        run: ./build.sh

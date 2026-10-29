@@ -11,6 +11,9 @@ python3 -m unittest discover -s tests -t tests   # collector.py logic — 18 che
 ./swift-tests/run.sh                              # Notifier state machine + security — 17 checks
 ```
 
+CI runs both suites and `build.sh` on every pull request (`.github/workflows/ci.yml`, job
+`checks`), and `main` only accepts a change whose `checks` passed.
+
 The Swift app has no XCTest target on purpose (there's no SwiftPM package here); the
 testable logic — the notifier's decision machine and the input-sanitisation — is
 exercised by `swift-tests/` as a plain compiled executable. If you change either,
