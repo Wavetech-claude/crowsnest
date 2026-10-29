@@ -94,4 +94,4 @@ First public release.
   from every field. The SSH host key is not auto-trusted (`accept-new` is deliberately
   not set). See [docs/architecture.md](docs/architecture.md#security-model).
 
-[1.0.0]: https://github.com/Shubhamgupta2612/crowsnest/releases/tag/v1.0.0
+[1.0.0]: https://github.com/Wavetech-claude/crowsnest/releases/tag/v1.0.0
