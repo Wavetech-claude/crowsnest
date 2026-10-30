@@ -11,7 +11,10 @@ on that machine and you're back in the session, with its full history, without
 hunting for the window or the session id.
 
 <p align="center">
-  <img src="docs/images/demo.gif" width="420" alt="A session hits a permission prompt and jumps to the top of the list">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/panel-dark.png">
+    <img src="docs/images/panel-light.png" width="360" alt="The Crow's Nest panel: a Needs approval card at the top, then two Your turn cards">
+  </picture>
 </p>
 
 The one thing it exists to tell you: **which session is sitting at an unanswered
